@@ -91,6 +91,39 @@ export class JettonMinter implements Contract {
         });
     }
 
+    async sendChangeAdmin(provider: ContractProvider, via: Sender, newAdmin: Address) {
+        await provider.internal(via, {
+            value: toNano('0.05'),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+                .storeUint(Opcodes.ChangeAdmin, 32)
+                .storeUint(0, 64) // op, queryId
+                .storeAddress(newAdmin)
+                .endCell(),
+        });
+    }
+
+    static changeContentMessage(content: Cell) {
+        return beginCell()
+            .storeUint(Opcodes.ChangeAdmin, 32)
+            .storeUint(0, 64) // op, queryId
+            .storeRef(content)
+            .endCell();
+    }
+
+    async sendChangeContent(provider: ContractProvider, via: Sender, content: Cell) {
+        await provider.internal(via, {
+            value: toNano('0.05'),
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell()
+                .storeUint(Opcodes.ChangeContent, 32)
+                .storeUint(0, 64) // op, queryId
+                .storeRef(content)
+                .endCell(),
+        });
+    }
+
+    // --- GET METHODS ---
     async getJettonData(provider: ContractProvider) {
         let res = await provider.get('get_jetton_data', []);
         let totalSupply = res.stack.readBigNumber();

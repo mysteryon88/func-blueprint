@@ -4,7 +4,15 @@ import { beginCell, Cell, toNano } from '@ton/core';
 import { compile } from '@ton/blueprint';
 
 import { JettonWallet } from '../wrappers/jetton-wallet';
-import { JettonMinter } from '../wrappers/jetton-minter';
+import { jettonContentToCell, JettonMinter } from '../wrappers/jetton-minter';
+
+const exampleContent = {
+    name: 'Sample Jetton',
+    description: 'Sample of Jetton',
+    symbol: 'JTN',
+    decimals: 0,
+    image: 'https://www.svgrepo.com/download/483336/coin-vector.svg',
+};
 
 describe('Jetton', () => {
     let minter_code: Cell;
@@ -32,7 +40,7 @@ describe('Jetton', () => {
             JettonMinter.createFromConfig(
                 {
                     admin: owner.address,
-                    content: beginCell().endCell(),
+                    content: jettonContentToCell({ type: 1, uri: 'uri' }),
                     wallet_code: wallet_code,
                 },
                 minter_code,
@@ -100,5 +108,22 @@ describe('Jetton', () => {
 
         expect(await wallet1.getJettonBalance()).toBe(toNano('45'));
         expect(await minter.getTotalSupply()).toBe(toNano('95'));
+    });
+
+    it('ChangeAdmin', async () => {
+        await minter.sendChangeAdmin(owner.getSender(), user1.address);
+
+        await minter.sendMint(user1.getSender(), user1.address, toNano('100'), toNano('0.05'), toNano('1'));
+
+        expect(await wallet1.getJettonBalance()).toBe(toNano('145'));
+        expect(await minter.getTotalSupply()).toBe(toNano('195'));
+    });
+
+    it('ChangeContent', async () => {
+        const before = await minter.getContent();
+        await minter.sendChangeContent(user1.getSender(), jettonContentToCell({ type: 1, uri: 'uri:uri' }));
+        const after = await minter.getContent();
+
+        expect(after).not.toBe(before);
     });
 });
