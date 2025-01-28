@@ -1,2 +1,6 @@
-# jetton-func-blueprint
-Jetton contract migration to blueprint and tests
+# FunC in Blueprint
+
+## Jetton
+
+- [ton-blockchain/minter-contract](https://github.com/ton-blockchain/minter-contract)
+- [ton-blockchain/token-contract](https://github.com/ton-blockchain/token-contract)
