@@ -1,0 +1,55 @@
+#include "imports/stdlib.fc";
+
+;; storage#_ addr1:MsgAddress addr2:MsgAddress = Storage;
+;; https://github.com/ton-blockchain/hack-challenge-1/tree/master/1.%20mutual%20fund
+
+() execute (cell) impure asm "c5 POPCTR";
+
+global slice data::owner1;
+global slice data::owner2;
+
+() load_data() impure {
+    slice ds = get_data().begin_parse();
+    data::owner1 = ds~load_msg_addr();
+    data::owner2 = ds~load_msg_addr();
+}
+
+() authorize(sender) inline {
+    throw_unless(187, equal_slices_bits(sender, data::owner1) | equal_slices_bits(sender, data::owner2));
+}
+
+() recv_internal(in_msg_full, in_msg_body) {
+    if (in_msg_body.slice_empty?()) { ;; ignore empty messages
+        return ();
+    }
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+
+    if (flags & 1) { ;; ignore all bounced messages
+        return ();
+    }
+    slice sender_address = cs~load_msg_addr();
+
+    load_data();
+    authorize(sender_address);
+    
+    cell request = in_msg_body~load_ref();
+    execute(request);
+}
+
+slice owner1() method_id {
+    var cs = get_data().begin_parse();
+    return cs~load_msg_addr();
+  
+}
+
+slice owner2() method_id {
+    var cs = get_data().begin_parse();
+    cs~load_msg_addr();
+    return cs~load_msg_addr();
+}
+
+int balance() method_id {
+    var [ balance, _ ] = get_balance();
+    return balance;
+}

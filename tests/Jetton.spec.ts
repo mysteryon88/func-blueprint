@@ -3,8 +3,8 @@ import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
 import { beginCell, Cell, toNano } from '@ton/core';
 import { compile } from '@ton/blueprint';
 
-import { JettonWallet } from '../wrappers/jetton-wallet';
-import { jettonContentToCell, JettonMinter } from '../wrappers/jetton-minter';
+import { JettonWallet } from '../wrappers/jetton/jetton-wallet';
+import { jettonContentToCell, JettonMinter } from '../wrappers/jetton/jetton-minter';
 
 const exampleContent = {
     name: 'Sample Jetton',
